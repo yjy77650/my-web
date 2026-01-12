@@ -2,12 +2,36 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>樂智遊戲測試 - 全功能整合版</title>
+    <title>樂智認知遊戲 - 旗艦整合版</title>
     <style>
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 一行兩個，按鈕較大好點擊 */
+    gap: 20px;
+    width: 90%;
+    max-width: 450px;
+    margin: 20px auto;
+}
+
+.category-item {
+    background: white;
+    padding: 20px 10px;
+    border-radius: 25px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    cursor: pointer;
+    border: 3px solid #f0f0f0;
+}
+
+.category-item:active { transform: scale(0.95); }
+
+.category-icon { font-size: 60px; margin-bottom: 10px; }
+.category-label { font-size: 22px; font-weight: bold; color: #333; }
+
         .screen { animation: fadeIn 0.5s; display: none; padding: 20px; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        body { text-align: center; font-family: "Microsoft JhengHei", sans-serif; background: #f0f4f8; margin: 0; padding-top: 20px; }
+        body { text-align: center; font-family: "Microsoft JhengHei", sans-serif; background: #f0f4f8; margin: 0; padding-top: 20px; overflow-x: hidden; }
         #menu-screen { display: block; padding-top: 50px; }
         
         .btn { 
@@ -15,11 +39,10 @@
             border-radius: 12px; border: none; background: white; 
             box-shadow: 0 8px 15px rgba(0,0,0,0.1); transition: all 0.3s ease; 
         }
-        .btn:hover { transform: translateY(-3px); }
+        .btn:hover { transform: translateY(-3px); background: #f8f9fa; }
         .back-btn { background: #747d8c; color: white; font-size: 18px; margin-top: 30px; }
         .retry-btn { background: #2ed573; color: white; font-weight: bold; }
 
-        /* --- 統一上方資訊欄 --- */
         .info-bar {
             background: white; border-radius: 20px; padding: 15px;
             display: flex; justify-content: space-around; align-items: center;
@@ -31,7 +54,6 @@
         .timer { color: #9b59b6; font-size: 28px; font-weight: bold; }
         .pause-btn { background: #f1c40f; color: white; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; border:none; }
 
-        /* --- 挑戰卡片介面 (分類挑戰用) --- */
         .challenge-card {
             background: white; width: 90%; max-width: 450px; margin: 0 auto;
             border-radius: 30px; padding: 30px 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);
@@ -42,31 +64,129 @@
         .progress-bar-bg { background: #e0e0e0; height: 10px; width: 80%; border-radius: 10px; margin: 20px auto; overflow: hidden; }
         .progress-bar-fill { background: #4a90e2; height: 100%; width: 0%; }
 
-        /* 節奏遊戲宮格 */
+/* 1. 容器保持不變 */
+.grid-container { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    grid-gap: 15px; width: 90%; 
+    max-width: 400px; margin: 0 auto; 
+    background: #fff; padding: 15px; 
+    border-radius: 25px; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+}
+
+/* 2. 修改：增加 transition，讓放大縮小時不會閃現，而是平滑變動 */
+.grid-box { 
+    aspect-ratio: 1 / 1; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 60px; 
+    color: white; 
+    font-weight: bold; 
+    border-radius: 15px; 
+    position: relative; 
+    cursor: pointer; 
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out; /* 關鍵：平滑效果 */
+}
+
+/* 3. 顏色設定保持不變 */
+#box-1 { background: #ff7675; } 
+#box-2 { background: #55efc4; } 
+#box-3 { background: #74b9ff; }
+#box-4 { background: #a29bfe; } 
+
+/* 4. 新增：當格子被選中時的放大與發光效果 */
+.active-box {
+    transform: scale(1.1); /* 放大 1.1 倍 */
+    box-shadow: 0 0 30px #f1c40f; /* 金色外發光 */
+    z-index: 10; /* 確保放大時不會被隔壁格子擋住 */
+}
+
+/* 5. 星星圖案 */
+.active-box::after { 
+    content: "⭐"; 
+    position: absolute; 
+    font-size: 50px; 
+    animation: starPop 0.5s ease-out; /* 讓星星出現時有個彈出的感覺 */
+}
+
+/* 6. 新增：星星彈出動畫（選配，增加趣味性） */
+@keyframes starPop {
+    0% { transform: scale(0); opacity: 0; }
+    80% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
         .grid-container { display: grid; grid-template-columns: 1fr 1fr; grid-gap: 15px; width: 90%; max-width: 400px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .grid-box { aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; font-size: 60px; color: white; font-weight: bold; border-radius: 15px; position: relative; cursor: pointer; }
         #box-1 { background: #ff7675; } #box-2 { background: #55efc4; } #box-4 { background: #a29bfe; } #box-3 { background: #74b9ff; }
         .active-box::after { content: "⭐"; position: absolute; font-size: 50px; }
 
-        /* 結算頁面 */
-        .result-card { background: white; padding: 40px; border-radius: 30px; width: 80%; max-width: 400px; margin: 50px auto; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+       /* 1. 翻牌卡片基礎樣式 */
+.card {
+    aspect-ratio: 1 / 1.3; 
+    background: #dfe6e9; 
+    border-radius: 15px;
+    font-size: 50px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    cursor: pointer; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: transform 0.3s, background-color 0.3s; 
+    position: relative;
+    color: #2d3436; /* 確保 "?" 或圖案顏色清晰 */
+}
+
+/* 2. 翻開後的樣式 */
+.card.flipped { 
+    background: white; 
+    transform: rotateY(180deg); 
+}
+
+/* 3. 配對成功的樣式 */
+.card.matched { 
+    background: #55efc4; 
+    color: white; /* 配對成功後圖案變白色更顯眼 */
+    cursor: default; 
+}
+
+#memory-game-area .info-bar {
+    display: flex !important; /* 強制使用彈性佈局 */
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    min-height: 60px; /* 給予足夠高度 */
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 10px;
+}
+
+/* 4. 新增：翻牌遊戲上方的提示文字樣式 */
+#memory-status {
+    font-size: 26px; /* 加大字體讓長輩看清楚 */
+    font-weight: bold;
+    color: #2c3e50;
+    display: inline-block;
+    margin: 10px 0;
+    min-height: 35px; /* 預留高度防止文字變動時畫面跳動 */
+}
+
+/* 5. 優化：調整翻牌區域的間距 */
+#memory-grid {
+    display: grid; 
+    grid-gap: 12px; 
+    width: 95%; 
+    max-width: 600px; 
+    margin: 20px auto;
+}
+        #pause-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; flex-direction: column; justify-content: center; align-items: center; color: white; }
+        #resume-countdown { font-size: 120px; font-weight: bold; color: #f1c40f; }
+
+        .result-card { background: white; padding: 40px; border-radius: 30px; width: 80%; max-width: 400px; margin: 50px auto; box-shadow: 0 15px 35px rgba(0,0,0,0.1); color: #333; }
         #final-score { font-size: 80px; color: #ff9f43; font-weight: bold; margin: 20px 0; }
-
-        /* 暫停/倒數遮罩 */
-        #pause-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 100; flex-direction: column; justify-content: center; align-items: center; color: white; }
-        #resume-countdown { font-size: 120px; font-weight: bold; color: #f1c40f; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
-
-        .card {
-        aspect-ratio: 1 / 1.3; background: #dfe6e9; border-radius: 15px;
-        font-size: 50px; display: flex; align-items: center; justify-content: center;
-        cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        transition: transform 0.3s; position: relative;
-        }
-        .card.flipped { background: white; transform: rotateY(180deg); }
-        .card.matched { background: #55efc4; cursor: default; }
-        .card-back { color: #636e72; }
-
     </style>
 </head>
 <body>
@@ -75,37 +195,68 @@
         <div id="pause-content">
             <h1>⏸️ 暫停中</h1>
             <button onclick="resumeWithCountdown()" class="btn" style="background: #2ed573; color: white;">▶️ 繼續遊戲</button><br>
-            <button onclick="location.reload()" class="btn back-btn">⬅️ 結束並回主選單</button>
+           <button onclick="handleBackFromPause()" class="btn back-btn">⬅️ 結束並回到上一頁</button>
         </div>
         <div id="resume-countdown" style="display:none;">3</div>
     </div>
 
     <div id="menu-screen" class="screen">
-        <h1>🎮 樂智遊戲選單</h1>
-        <button onclick="enterChallenge('fruit', '水果')" class="btn">🍎 水果挑戰</button>
-        <button onclick="enterChallenge('animal', '動物')" class="btn">🐱 動物挑戰</button>
-        <button onclick="enterChallenge('sport', '球類')" class="btn">🏀 球類挑戰</button>
-        <button onclick="enterChallenge('music', '樂器')" class="btn">🎹 樂器挑戰</button>
-        <button onclick="enterChallenge('trans', '交通')" class="btn">🚗 交通挑戰</button>
-        <button onclick="enterChallenge('build', '建築')" class="btn">🏠 建築挑戰</button>
-        <button onclick="startRhythm()" class="btn" style="background: #ffbe76;">🥁 節奏拍手挑戰</button>
-        <button onclick="startMemoryGame()" class="btn" style="background: #fe9bddff;">🎴 翻牌配對遊戲</button>
-    </div>
+    <h1>🎮 樂智認知遊戲選單</h1>
+    <button onclick="showCategoryMenu()" class="btn" style="background: #4a90e2; color: white; width: 80%; max-width: 400px;">
+        🖼️ 圖片辨別挑戰
+    </button>
+    <br>
+    <button onclick="startRhythm()" class="btn" style="background: #ffbe76;">🥁 節奏拍手</button>
+    <button onclick="startMemoryGame()" class="btn" style="background: #a29bfe; color: white;">🎴 翻牌配對</button>
+    <button onclick="startCountGame()" class="btn" style="background: #55efc4;">🔢 數量挑戰</button>
+    <button onclick="startBodyGame()" class="btn" style="background: #ffa502;">🧘 健康動動操</button>
+</div>
 
+<div id="category-screen" class="screen">
+    <h2>🖼️ 請選擇圖片類型</h2>
+    <div class="category-grid">
+        <div class="category-item" onclick="enterChallenge('fruit', '水果')">
+            <div class="category-icon">🍎</div>
+            <div class="category-label">水果</div>
+        </div>
+        <div class="category-item" onclick="enterChallenge('animal', '動物')">
+            <div class="category-icon">🐱</div>
+            <div class="category-label">動物</div>
+        </div>
+        <div class="category-item" onclick="enterChallenge('sport', '球類')">
+            <div class="category-icon">🏀</div>
+            <div class="category-label">球類</div>
+        </div>
+        <div class="category-item" onclick="enterChallenge('music', '樂器')">
+            <div class="category-icon">🎹</div>
+            <div class="category-label">樂器</div>
+        </div>
+        <div class="category-item" onclick="enterChallenge('trans', '交通')">
+            <div class="category-icon">🚗</div>
+            <div class="category-label">交通</div>
+        </div>
+        <div class="category-item" onclick="enterChallenge('build', '建築')">
+            <div class="category-icon">🏠</div>
+            <div class="category-label">建築</div>
+        </div>
+    </div>
+    <button onclick="location.reload()" class="btn back-btn">⬅️ 回主選單</button>
+</div>
     <div id="game-screen" class="screen">
         <div class="info-bar">
-            <div class="info-item">目前遊戲: <span class="highlight" id="info-game-name">水果</span><br>動作: <span class="highlight">命名</span></div>
+            <div class="info-item">目前遊戲: <span class="highlight" id="info-game-name">水果</span></div>
             <button class="pause-btn" onclick="togglePause(false)">⏸️ 暫停</button>
         </div>
         <div class="challenge-card">
             <div id="display-area" class="emoji-display">🍎</div>
             <div id="countdown-hint" class="countdown-hint">請準備...</div>
             <div id="answer-area" class="answer-text">?</div>
-            <div id="pic-index" style="color: #636e72;">圖片：1</div>
             <div class="progress-bar-bg"><div id="progress-fill" class="progress-bar-fill"></div></div>
         </div>
         <button id="next-btn" class="btn" style="background: #ff4757; color: white; margin-top: 30px;">下一個</button><br>
-        <button onclick="location.reload()" class="btn back-btn">⬅️ 主選單</button>
+        
+        
+       <button onclick="handleBackFromPause()" class="btn back-btn">⬅️ 結束並回到上一頁</button>
     </div>
 
     <div id="rhythm-screen" class="screen">
@@ -124,51 +275,150 @@
     </div>
 
     <div id="result-screen" class="screen">
-        <div class="result-card">
-            <h1>🎊 挑戰完成 🎊</h1>
-            <p style="font-size: 24px;">最終得分</p>
-            <div id="final-score">0</div>
-            <button onclick="startRhythm()" class="btn retry-btn">🔄 再玩一次</button><br>
-            <button onclick="location.reload()" class="btn back-btn">🏠 返回主選單</button>
-        </div>
-       </div>
-        <div id="memory-screen" class="screen">
-    <div id="memory-difficulty-select">
-        <h1>🎯 請選擇難度</h1>
-        <button onclick="initMemoryGame(6)" class="btn" style="background: #55efc4;">🟢 簡單 (6張)</button><br>
-        <button onclick="initMemoryGame(8)" class="btn" style="background: #74b9ff;">🔵 一般 (8張)</button><br>
-        <button onclick="initMemoryGame(10)" class="btn" style="background: #ff7675; color:white;">🔴 困難 (10張)</button><br>
-        <button onclick="location.reload()" class="btn back-btn">⬅️ 返回主選單</button>
-    </div>
-
-    <div id="memory-game-area" style="display:none;">
-        <div class="info-bar">
-            <div class="info-item">目前遊戲: <span class="highlight">翻牌配對</span></div>
-            <button class="pause-btn" onclick="startMemoryGame()">🔄 重選難度</button>
-        </div>
-        
-        <div id="memory-grid" style="display: grid; grid-gap: 12px; width: 95%; max-width: 600px; margin: 20px auto;">
-        </div>
-
-        <h2 id="memory-status" style="color: #4a90e2; min-height: 40px;">請翻開兩張牌</h2>
-        <button onclick="location.reload()" class="btn back-btn">🏠 主選單</button>
+    <div class="result-card">
+        <h1>🎊 挑戰完成 🎊</h1>
+        <p style="font-size: 24px;">太棒了！您獲得了</p>
+        <div id="final-score" style="font-size: 80px; color: #ff9f43; font-weight: bold; margin: 20px 0;">0</div>
+        <p style="font-size: 24px; margin-bottom: 20px;">分</p>
+        <button onclick="location.reload()" class="btn back-btn">🏠 返回主選單</button>
     </div>
 </div>
 
+<div id="body-result-screen" class="screen">
+    <div class="result-card">
+        <h1>🎊 運動完成 🎊</h1>
+        <p style="font-size: 24px; color: #2ed573; font-weight: bold;">太棒了！身體都動起來了！</p>
+        <div style="font-size: 100px; margin: 20px 0;">🧘‍♂️</div>
+        <button onclick="startBodyGame()" class="btn retry-btn">🔄 重新開始</button><br>
+        <button onclick="location.reload()" class="btn back-btn">🏠 返回主選單</button>
+    </div>
+</div>
+
+    <div id="memory-screen" class="screen">
+        <div id="memory-difficulty-select">
+            <h1>🎯 選擇翻牌難度</h1>
+            <button onclick="initMemoryGame(6)" class="btn" style="background: #55efc4;">🟢 簡單 (6張)</button><br>
+            <button onclick="initMemoryGame(8)" class="btn" style="background: #74b9ff;">🔵 一般 (8張)</button><br>
+            <button onclick="initMemoryGame(10)" class="btn" style="background: #ff7675; color:white;">🔴 困難 (10張)</button><br>
+            <button onclick="location.reload()" class="btn back-btn">⬅️ 返回</button>
+        </div>
+        <div id="memory-game-area" style="display:none;">
+
+        
+            
+                <span id="memory-status">請翻開兩張牌</span>
+                <button class="pause-btn" onclick="startMemoryGame()">🔄 重選</button>
+            </div>
+            <div id="memory-grid" style="display: grid; grid-gap: 12px; width: 95%; max-width: 600px; margin: 20px auto;"></div>
+            <button onclick="location.reload()" class="btn back-btn">🏠 主選單</button>
+        </div>
+        
+    </div>
+
+    <div id="count-screen" class="screen">
+        <div class="info-bar">
+            <div id="count-progress" class="highlight">第 1 / 5 題</div>
+        </div>
+        <div class="challenge-card">
+            <div id="count-display-area" style="font-size: 80px; min-height: 150px; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; gap: 10px; padding: 20px;"></div>
+            <div style="font-size: 24px; color: #4a90e2; font-weight: bold;">畫面中有幾個？</div>
+            <div id="count-feedback" style="font-size: 22px; color: #ff4757; height: 35px; margin-top: 5px; font-weight: bold;"></div> 
+            
+            <div id="count-options" style="display: flex; justify-content: center; gap: 10px; margin-top: 15px;">
+                <button onclick="checkCount(1)" class="btn" style="width:75px; height:75px; padding:0;">1</button>
+                <button onclick="checkCount(2)" class="btn" style="width:75px; height:75px; padding:0;">2</button>
+                <button onclick="checkCount(3)" class="btn" style="width:75px; height:75px; padding:0;">3</button>
+                <button onclick="checkCount(4)" class="btn" style="width:75px; height:75px; padding:0;">4</button>
+            </div>
+        </div>
+        <button onclick="location.reload()" class="btn back-btn">🏠 返回主選單</button>
+    </div>
+
+    <div id="count-result-screen" class="screen">
+        <div class="result-card">
+            <h1>🎊 數量挑戰完成 🎊</h1>
+            <p style="font-size: 24px; color: #2ed573; font-weight: bold;">太棒了！您數得非常正確！</p>
+            <div style="font-size: 100px; margin: 20px 0;">🎯</div>
+            <button onclick="startCountGame()" class="btn retry-btn">🔄 再玩一次</button><br>
+            <button onclick="location.reload()" class="btn back-btn">🏠 返回主選單</button>
+        </div>
+    </div>
+    <div id="body-screen" class="screen">
+    <div class="info-bar">
+        <div class="info-item">目前遊戲: <span class="highlight">健康動動操</span></div>
+        <div class="timer" id="body-timer-text">01:00</div>
+        <button class="pause-btn" onclick="togglePause(false)">⏸️ 暫停</button>
+    </div>
+    
+    <div class="challenge-card">
+        <div id="body-display-emoji" class="emoji-display">🙆‍♂️</div>
+        <div id="body-display-text" style="font-size: 50px; color: #2f3542; font-weight: bold; margin-bottom: 20px;">準備好了嗎？</div>
+        <div class="progress-bar-bg"><div id="body-progress-fill" class="progress-bar-fill"></div></div>
+    </div>
+    <button onclick="location.reload()" class="btn back-btn">🏠 返回主選單</button>
+</div>
+
     <script>
+
+function handleBackFromPause() {
+    // 1. 強制清除所有計時器，確保畫面停止
+    clearTimeout(answerTimeout);
+    clearInterval(visualCountdownInterval);
+    clearInterval(rhythmTimer);
+    clearInterval(countdownTimer);
+    if(typeof bodyGameTimer !== 'undefined') clearInterval(bodyGameTimer);
+    if(typeof bodyTimer !== 'undefined') clearTimeout(bodyTimer);
+
+    // 2. 關閉暫停遮罩
+    document.getElementById('pause-overlay').style.display = 'none';
+
+    // 3. 核心邏輯：判斷回到哪一頁
+    // 如果 currentType 不是空的，代表正在玩 水果、動物、樂器等圖片辨別挑戰
+    if (currentType !== '') {
+        hideAll();
+        document.getElementById('category-screen').style.display = 'block';
+        // 重要：返回選單後清空目前類型，避免下次誤判
+        currentType = ''; 
+    } else {
+        // 如果是動動操、節奏拍手等，則回到最外層主選單
+        hideAll();
+        document.getElementById('menu-screen').style.display = 'block';
+    }
+}
+
+    function showCategoryMenu() {
+    hideAll();
+    document.getElementById('category-screen').style.display = 'block';
+}
+
+// 修正原本的 enterChallenge，確保它能隱藏次選單
+function enterChallenge(type, title) {
+    hideAll(); // 這會隱藏 category-screen
+    currentType = type; 
+    currentIndex = -1; 
+    isRhythmMode = false;
+    isBodyMode = false;
+    document.getElementById('info-game-name').innerText = title;
+    document.getElementById('game-screen').style.display = 'block';
+    showNextItem();
+}
+        // --- 基礎資料 ---
         const dataLists = {
-            fruit: [ {e:"🍎", n:"蘋果"}, {e:"🍌", n:"香蕉"}, {e:"🍇", n:"葡萄"}, {e:"🍉", n:"西瓜"}, {e:"🍓", n:"草莓"}, {e:"🍍", n:"鳳梨"} ],
-            animal: [ {e:"🐶", n:"小狗"}, {e:"🐱", n:"小貓"}, {e:"🐰", n:"兔子"}, {e:"🐘", n:"大象"}, {e:"🦁", n:"獅子"}, {e:"🦒", n:"長頸鹿"} ],
-            sport: [ {e:"🏀", n:"籃球"}, {e:"⚽", n:"足球"}, {e:"⚾", n:"棒球"}, {e:"🎾", n:"網球"}, {e:"🏐", n:"排球"} ],
-            music: [ {e:"🎹", n:"鋼琴"}, {e:"🎸", n:"吉他"}, {e:"🎻", n:"小提琴"}, {e:"🎷", n:"薩克斯風"}, {e:"🥁", n:"爵士鼓"} ],
-            trans: [ {e:"🚗", n:"汽車"}, {e:"🚌", n:"巴士"}, {e:"🚑", n:"救護車"}, {e:"🚲", n:"腳踏車"}, {e:"✈️", n:"飛機"} ],
-            build: [ {e:"🏠", n:"房子"}, {e:"🏢", n:"大樓"}, {e:"🏫", n:"學校"}, {e:"🏥", n:"醫院"}, {e:"⛪", n:"教堂"} ]
+            fruit: [ {e:"🍎", n:"蘋果"}, {e:"🍌", n:"香蕉"}, {e:"🍇", n:"葡萄"}, {e:"🍉", n:"西瓜"}, {e:"🍓", n:"草莓"}, {e:"🍍", n:"鳳梨"}, {e:"🍒", n:"櫻桃"}, {e:"🫐", n:"藍莓"}, {e:"🥭", n:"芒果"}, {e:"🥝", n:"奇異果"} ],
+            animal: [ {e:"🐶", n:"小狗"}, {e:"🐱", n:"小貓"}, {e:"🐰", n:"兔子"}, {e:"🐘", n:"大象"}, {e:"🦁", n:"獅子"}, {e:"🐷", n:"小豬"}, {e:"🐒", n:"猴子"}, {e:"🐸", n:"青蛙"}, {e:"🦊", n:"狐狸"}, {e:"🐭", n:"老鼠"} ],
+            sport: [ {e:"🏀", n:"籃球"}, {e:"⚽", n:"足球"}, {e:"⚾", n:"棒球"}, {e:"🏈", n:"橄欖球"}, {e:"🎱", n:"撞球"}, {e:"🏓", n:"乒乓球"}, {e:"⛳️", n:"高爾夫球"}, {e:"🏸", n:"羽毛球"} ],
+            music: [ {e:"🎹", n:"鋼琴"}, {e:"🎸", n:"吉他"}, {e:"🎻", n:"小提琴"}, {e:"🎤", n:"麥克風"}, {e:"🎷", n:"薩克斯風"}, {e:"🎺", n:"小號"} ],
+            trans: [ {e:"🚗", n:"汽車"}, {e:"🚌", n:"巴士"}, {e:"🚲", n:"腳踏車"}, {e:"🚒", n:"消防車"}, {e:"🚓", n:"警察車"}, {e:"🛵", n:"摩托車"}, {e:"✈️", n:"飛機"} ],
+            build: [ {e:"🏠", n:"房子"}, {e:"🏢", n:"大樓"}, {e:"🏫", n:"學校"}, {e:"⛪️", n:"教堂"}, {e:"🏥", n:"醫院"}, {e:"🏦", n:"銀行"}, {e:"⛩️", n:"神社"} ]
         };
 
         let currentType = '', currentIndex = 0, isRhythmMode = false, isPaused = false;
         let score = 0, timeLeft = 60, lastBox = -1, rhythmTimer, countdownTimer, isBeat = false;
         let answerTimeout, visualCountdownInterval, secondsLeft = 5;
+        // 在 script 標籤內的最上方找到變數定義處加入
+        let isBodyMode = false;
 
+        // 音效系統
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(freq, duration, type='sine') {
             const osc = audioCtx.createOscillator();
@@ -179,11 +429,16 @@
             osc.stop(audioCtx.currentTime + duration);
         }
 
-        // --- 分類挑戰邏輯 ---
+        // --- 通用畫面切換 ---
+        function hideAll() {
+            document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        }
+
+        // --- 1. 分類挑戰邏輯 ---
         function enterChallenge(type, title) {
+            hideAll();
             currentType = type; currentIndex = -1; isRhythmMode = false;
             document.getElementById('info-game-name').innerText = title;
-            document.getElementById('menu-screen').style.display = 'none';
             document.getElementById('game-screen').style.display = 'block';
             showNextItem();
         }
@@ -197,40 +452,89 @@
             startChallengeTimer();
         }
 
-        function startChallengeTimer() {
-            clearTimeout(answerTimeout); clearInterval(visualCountdownInterval);
-            const item = dataLists[currentType][currentIndex];
-            document.getElementById('display-area').innerText = item.e;
-            document.getElementById('answer-area').innerText = "?";
-            document.getElementById('pic-index').innerText = `圖片：${currentIndex + 1}`;
-            
-            const fill = document.getElementById('progress-fill');
-            fill.style.transition = 'none';
-            fill.style.width = ((5 - secondsLeft) / 5 * 100) + '%';
-            setTimeout(() => { fill.style.transition = `width ${secondsLeft}s linear`; fill.style.width = '100%'; }, 50);
+        // 新增：從暫停中恢復的計時邏輯
+function continueChallengeTimer() {
+    const item = dataLists[currentType][currentIndex];
+    const fill = document.getElementById('progress-fill');
+    
+    fill.style.transition = 'none';
+    
+    // 檢查恢復時是否已經進入紅色警戒
+    if(secondsLeft <= 2) {
+        fill.style.backgroundColor = '#ff4757';
+    }
 
-            document.getElementById('countdown-hint').innerText = `公布答案倒數：${secondsLeft}秒`;
-            if(secondsLeft === 5) window.speechSynthesis.speak(new SpeechSynthesisUtterance("請看圖"));
+    setTimeout(() => {
+        fill.style.transition = `width ${secondsLeft}s linear`;
+        fill.style.width = '100%';
+    }, 50);
 
-            visualCountdownInterval = setInterval(() => {
-                secondsLeft--;
-                if (secondsLeft > 0) document.getElementById('countdown-hint').innerText = `公布答案倒數：${secondsLeft}秒`;
-                else { clearInterval(visualCountdownInterval); document.getElementById('countdown-hint').innerText = "答案揭曉！"; }
-            }, 1000);
+    answerTimeout = setTimeout(() => {
+        document.getElementById('answer-area').innerText = item.n;
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(item.n));
+    }, secondsLeft * 1000);
 
-            answerTimeout = setTimeout(() => {
-                document.getElementById('answer-area').innerText = item.n;
-                window.speechSynthesis.speak(new SpeechSynthesisUtterance(item.n));
-            }, secondsLeft * 1000);
+    visualCountdownInterval = setInterval(() => {
+        secondsLeft--;
+        // 倒數過程中也要檢查（預防從3秒恢復後跳到2秒的情況）
+        if(secondsLeft <= 2) {
+            fill.style.backgroundColor = '#ff4757';
         }
 
-        // --- 節奏遊戲邏輯 ---
+        if(secondsLeft > 0) {
+            document.getElementById('countdown-hint').innerText = `倒數 ${secondsLeft} 秒`;
+        } else {
+            clearInterval(visualCountdownInterval);
+        }
+    }, 1000);
+}
+
+// 修改原本的 startChallengeTimer
+function startChallengeTimer() {
+    clearTimeout(answerTimeout); 
+    clearInterval(visualCountdownInterval);
+    
+    secondsLeft = 5; 
+    const item = dataLists[currentType][currentIndex];
+    document.getElementById('display-area').innerText = item.e;
+    document.getElementById('answer-area').innerText = "?";
+    
+    const fill = document.getElementById('progress-fill');
+    fill.style.transition = 'none'; 
+    fill.style.width = '0%';
+    fill.style.backgroundColor = '#4a90e2'; // 1. 重設為藍色
+
+    setTimeout(() => { 
+        fill.style.transition = 'width 5s linear'; 
+        fill.style.width = '100%'; 
+    }, 50);
+
+    document.getElementById('countdown-hint').innerText = `倒數 5 秒`;
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance("請看圖"));
+
+    visualCountdownInterval = setInterval(() => {
+        secondsLeft--;
+        // 2. 檢查秒數變色
+        if(secondsLeft <= 2) {
+            fill.style.backgroundColor = '#ff4757'; // 剩下2秒變紅色
+        }
+        
+        if(secondsLeft > 0) {
+            document.getElementById('countdown-hint').innerText = `倒數 ${secondsLeft} 秒`;
+        } else {
+            clearInterval(visualCountdownInterval);
+        }
+    }, 1000);
+
+    answerTimeout = setTimeout(() => {
+        document.getElementById('answer-area').innerText = item.n;
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(item.n));
+    }, 5000);
+}
+        // --- 2. 拍手挑戰邏輯 ---
         function startRhythm() {
-            isRhythmMode = true; score = 0; timeLeft = 60; isPaused = false;
-            document.getElementById('score-text').innerText = "分數：0";
-            document.getElementById('timer-text').innerText = "00:60";
-            document.getElementById('menu-screen').style.display = 'none';
-            document.getElementById('result-screen').style.display = 'none';
+            hideAll();
+            isRhythmMode = true; score = 0; timeLeft = 60;
             document.getElementById('rhythm-screen').style.display = 'block';
             startTimers();
         }
@@ -239,168 +543,394 @@
             rhythmTimer = setInterval(nextBeat, 1200);
             countdownTimer = setInterval(() => {
                 timeLeft--;
-                document.getElementById('timer-text').innerText = `00:${timeLeft < 10 ? '0'+timeLeft : timeLeft}`;
-                if (timeLeft <= 0) endGame();
+                document.getElementById('timer-text').innerText = `00:${timeLeft<10?'0'+timeLeft:timeLeft}`;
+                if(timeLeft<=0) endGame();
             }, 1000);
         }
 
         function nextBeat() {
-            if (isPaused) return;
+            if(isPaused) return;
             document.querySelectorAll('.grid-box').forEach(b => b.classList.remove('active-box'));
-            let newBox; do { newBox = Math.floor(Math.random() * 4) + 1; } while (newBox === lastBox);
-            lastBox = newBox; isBeat = true;
-            document.getElementById('box-' + newBox).classList.add('active-box');
+            let b = Math.floor(Math.random()*4)+1;
+            isBeat = true;
+            document.getElementById('box-'+b).classList.add('active-box');
             playSound(200, 0.1);
-            setTimeout(() => { isBeat = false; document.querySelectorAll('.grid-box').forEach(b => b.classList.remove('active-box')); }, 800);
+            setTimeout(() => isBeat = false, 800);
         }
 
-        document.getElementById('hit-area').onclick = function() {
-            if(isBeat && !isPaused && isRhythmMode) {
-                score += 10; document.getElementById('score-text').innerText = "分數：" + score;
-                isBeat = false; playSound(1000, 0.2);
-            }
-        };
+        // 修改點擊判定邏輯
+document.getElementById('hit-area').onclick = function(event) {
+    // 1. 取得使用者點擊到的目標元素
+    const clickedElement = event.target;
+    
+    // 2. 檢查：必須在節拍內 (isBeat)、沒暫停 (!isPaused)，且點到的格子帶有 'active-box' 類別
+    if(isBeat && !isPaused && clickedElement.classList.contains('active-box')) {
+        // --- 點對了 ---
+        score += 10; 
+        document.getElementById('score-text').innerText = "分數：" + score;
+        
+        // 成功後立刻移除星星，防止同一拍重複點擊得分
+        clickedElement.classList.remove('active-box');
+        isBeat = false; 
+        
+        playSound(1000, 0.2); // 高音：正確
+    } else if (!isPaused && clickedElement.classList.contains('grid-box')) {
+        // --- 點錯了 (選配：如果要扣分或放錯誤音效可以加在這裡) ---
+       // playSound(200, 0.05); // 低音：錯誤提示
+    }
+};
 
         function endGame() {
-            clearInterval(rhythmTimer); clearInterval(countdownTimer);
-            playSound(600, 0.5, 'triangle');
-            document.getElementById('rhythm-screen').style.display = 'none';
-            document.getElementById('result-screen').style.display = 'block';
-            document.getElementById('final-score').innerText = score;
-            window.speechSynthesis.speak(new SpeechSynthesisUtterance("遊戲結束，得分" + score));
-        }
-
-        // --- 暫停與恢復 ---
-        function togglePause(rhythm) {
-            isPaused = true;
-            if(rhythm) { clearInterval(rhythmTimer); clearInterval(countdownTimer); }
-            else { clearTimeout(answerTimeout); clearInterval(visualCountdownInterval); }
-            document.getElementById('pause-overlay').style.display = 'flex';
-        }
-
-        function resumeWithCountdown() {
-            document.getElementById('pause-content').style.display = 'none';
-            const counter = document.getElementById('resume-countdown');
-            counter.style.display = 'block';
-            let c = 3; counter.innerText = c; playSound(440, 0.2);
-            let itv = setInterval(() => {
-                c--;
-                if(c > 0) { counter.innerText = c; playSound(440, 0.2); }
-                else {
-                    clearInterval(itv); counter.innerText = "GO!"; playSound(880, 0.5);
-                    setTimeout(() => {
-                        isPaused = false; document.getElementById('pause-overlay').style.display = 'none';
-                        document.getElementById('pause-content').style.display = 'block';
-                        counter.style.display = 'none';
-                        if(isRhythmMode) startTimers(); else if(secondsLeft > 0) startChallengeTimer();
-                    }, 500);
-                }
-            }, 1000);
-        }
-
-let flippedCards = [];
-let matchedCount = 0;
-let canClick = true;
-let totalPairs = 0;
-
-// 進入難度選擇
-function startMemoryGame() {
-    document.getElementById('menu-screen').style.display = 'none';
-    document.getElementById('rhythm-screen').style.display = 'none';
-    document.getElementById('game-screen').style.display = 'none';
-    document.getElementById('result-screen').style.display = 'none';
+    // 1. 停止所有計時器
+    clearInterval(rhythmTimer); 
+    clearInterval(countdownTimer);
     
-    document.getElementById('memory-screen').style.display = 'block';
-    document.getElementById('memory-difficulty-select').style.display = 'block';
-    document.getElementById('memory-game-area').style.display = 'none';
-}
-
-// 初始化遊戲
-function initMemoryGame(cardCount) {
-    const icons = ["🍎", "🐶", "🏀", "🐱", "🍇", "🚗", "🏠", "🎸", "🎈", "🎨"];
-    totalPairs = cardCount / 2;
-    let selectedIcons = icons.slice(0, totalPairs);
-    let deck = [...selectedIcons, ...selectedIcons];
-    deck.sort(() => Math.random() - 0.5);
-
-    const grid = document.getElementById('memory-grid');
-    grid.innerHTML = '';
+    // 2. 切換畫面
+    hideAll();
+    document.getElementById('result-screen').style.display = 'block';
     
-    // --- 動態調整排版 ---
-    if (cardCount === 6) {
-        grid.style.gridTemplateColumns = 'repeat(3, 1fr)'; // 3x2
-    } else if (cardCount === 8) {
-        grid.style.gridTemplateColumns = 'repeat(4, 1fr)'; // 4x2
-    } else if (cardCount === 10) {
-        grid.style.gridTemplateColumns = 'repeat(5, 1fr)'; // 5x2
-    }
-
-    matchedCount = 0;
-    flippedCards = [];
-    canClick = true;
-    document.getElementById('memory-status').innerText = "請翻開兩張牌";
-
-    deck.forEach((emoji) => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.dataset.value = emoji;
-        card.innerHTML = '<span class="card-back">❓</span>';
-        card.onclick = () => flipCard(card);
-        grid.appendChild(card);
-    });
-
-    document.getElementById('memory-difficulty-select').style.display = 'none';
-    document.getElementById('memory-game-area').style.display = 'block';
+    // 3. 填入最終分數
+    document.getElementById('final-score').innerText = score;
+    
+    // 4. 播放勝利音效與語音
+    playSound(880, 0.3);
+    setTimeout(() => playSound(1100, 0.5), 200);
+    
+    // 語音會報出分數，增加成就感
+    const msg = `挑戰完成！您獲得了 ${score} 分`;
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(msg));
 }
 
-function flipCard(card) {
-    if (!canClick || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+        // --- 3. 翻牌配對邏輯 ---
+        let flipped = [], matched = 0, canFlip = true, totalP = 0;
+        function startMemoryGame() {
+            hideAll();
+            document.getElementById('memory-screen').style.display = 'block';
+            document.getElementById('memory-difficulty-select').style.display = 'block';
+            document.getElementById('memory-game-area').style.display = 'none';
+        }
 
-    playSound(400, 0.1);
-    card.classList.add('flipped');
-    card.innerText = card.dataset.value;
-    flippedCards.push(card);
+        function initMemoryGame(count) {
+            const icons = ["🍎","🐶","🏀","🎹","🚗","🏠","🎈","🎨"];
+            totalP = count/2;
+            let deck = [...icons.slice(0, totalP), ...icons.slice(0, totalP)];
+            deck.sort(() => Math.random()-0.5);
+            
+            const grid = document.getElementById('memory-grid');
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${count === 6 ? 3 : (count === 8 ? 4 : 5)}, 1fr)`;
+            
+            deck.forEach(emoji => {
+                const c = document.createElement('div');
+                c.className = 'card';
+                c.dataset.v = emoji;
+                c.innerHTML = '❓';
+                c.onclick = () => {
+                    if(!canFlip || c.classList.contains('flipped')) return;
+                    playSound(400, 0.1);
+                    c.classList.add('flipped'); c.innerText = c.dataset.v;
+                    flipped.push(c);
+                    if(flipped.length === 2) checkM();
+                };
+                grid.appendChild(c);
+            });
+            matched = 0;
+            document.getElementById('memory-difficulty-select').style.display = 'none';
+            document.getElementById('memory-game-area').style.display = 'block';
+            const statusText = document.getElementById('memory-status');
+    if(statusText) {
+        statusText.innerText = "請翻開兩張牌";
+        statusText.style.color = "#2c3e50";
+           }
+        }
+       
+        function checkM() {
+    canFlip = false;
+    const [a, b] = flipped;
+    // 抓取狀態文字元素
+    const statusText = document.getElementById('memory-status');
 
-    if (flippedCards.length === 2) {
-        checkMatch();
-    }
-}
-
-function checkMatch() {
-    canClick = false;
-    const [card1, card2] = flippedCards;
-
-    if (card1.dataset.value === card2.dataset.value) {
-        // 配對成功
+    if (a.dataset.v === b.dataset.v) {
+        // --- 配對成功 ---
         setTimeout(() => {
-            card1.classList.add('matched');
-            card2.classList.add('matched');
+            a.classList.add('matched');
+            b.classList.add('matched');
+            
+            // 強制更新文字與顏色
+            statusText.style.display = "block"; 
+            statusText.style.color = "#2ed573"; 
+            statusText.innerText = "⭐ 配對成功！";
+            
             playSound(1000, 0.3);
-            matchedCount++;
-            flippedCards = [];
-            canClick = true;
-            if (matchedCount === totalPairs) {
-                document.getElementById('memory-status').innerText = "🎉 恭喜通關！";
-                window.speechSynthesis.speak(new SpeechSynthesisUtterance("太棒了，全部配對成功！"));
-            } else {
-                document.getElementById('memory-status').innerText = "配對成功！繼續加油";
+            flipped = [];
+            canFlip = true;
+            matched++;
+
+            if (matched === totalP) {
+                statusText.innerText = "🎊 恭喜全部通關！";
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance("恭喜通關"));
             }
         }, 500);
     } else {
-        // 配對失敗
-        document.getElementById('memory-status').innerText = "配對錯誤，請記住位置...";
+        // --- 配對失敗 ---
+        // 1. 立刻顯示錯誤文字
+        statusText.style.display = "block";
+        statusText.style.color = "#ff4757"; // 強制變紅色
+        statusText.innerText = "❌ 不一樣喔，再試試！";
+        
+        // 2. 停頓 2 秒
         setTimeout(() => {
-            card1.classList.remove('flipped');
-            card1.innerHTML = '<span class="card-back">❓</span>';
-            card2.classList.remove('flipped');
-            card2.innerHTML = '<span class="card-back">❓</span>';
-            flippedCards = [];
-            canClick = true;
-            document.getElementById('memory-status').innerText = "請再試一次";
-        }, 2000); // 維持兩秒讓長輩記憶
+            a.classList.remove('flipped'); a.innerText = '❓';
+            b.classList.remove('flipped'); b.innerText = '❓';
+            
+            // 3. 恢復初始提示
+            statusText.innerText = "請再翻兩張牌";
+            statusText.style.color = "#2c3e50";
+            
+            flipped = [];
+            canFlip = true;
+        }, 2000); 
     }
 }
+
+        // --- 4. 數量挑戰邏輯 ---
+        let countRound = 1, countAns = 0;
         
+        function startCountGame() {
+            hideAll(); 
+            countRound = 1;
+            document.getElementById('count-screen').style.display = 'block';
+            nextCountQ();
+        }
+
+        function nextCountQ() {
+            if (countRound > 5) {
+                hideAll();
+                document.getElementById('count-result-screen').style.display = 'block';
+                playSound(880, 0.5);
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance("恭喜通關"));
+                return;
+            }
+            
+            document.getElementById('count-feedback').innerText = ""; // 清空反饋
+            document.getElementById('count-progress').innerText = `第 ${countRound} / 5 題`;
+            
+            const area = document.getElementById('count-display-area');
+            area.innerHTML = '';
+            
+            countAns = Math.floor(Math.random() * 4) + 1;
+            const iconPool = ["🍎", "🐱", "🚗", "⚽", "🐥", "🍓"];
+            const icon = iconPool[Math.floor(Math.random() * iconPool.length)];
+            
+            for (let i = 0; i < countAns; i++) {
+                area.innerHTML += `<span>${icon}</span>`;
+            }
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance("畫面中有幾個？"));
+        }
+
+        function checkCount(n) {
+            const feedback = document.getElementById('count-feedback');
+            if (n === countAns) {
+                feedback.innerText = "⭐ 太棒了！答對了！";
+                feedback.style.color = "#2ed573";
+                playSound(1000, 0.2);
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance("答對了"));
+                setTimeout(() => {
+                    countRound++;
+                    nextCountQ();
+                }, 800);
+            } else {
+                feedback.innerText = "❌ 不對喔，再數一次看看！";
+                feedback.style.color = "#ff4757";
+                playSound(200, 0.3);
+                window.speechSynthesis.speak(new SpeechSynthesisUtterance("再數一次"));
+            }
+        }
+
+        // --- 暫停功能 ---
+        function togglePause(r) {
+    isPaused = true;
+    
+  // 在 togglePause 裡面加入這一行
+if (isBodyMode) {
+    clearInterval(bodyGameTimer); // 暫停 60 秒倒數
+    clearTimeout(bodyTimer);      // 暫停動作切換
+}
+    // 停止邏輯計時
+    clearTimeout(answerTimeout);
+    clearInterval(visualCountdownInterval);
+    if(r || isRhythmMode) { 
+        clearInterval(rhythmTimer); 
+        clearInterval(countdownTimer); 
+    }
+    if(typeof bodyTimer !== 'undefined') {
+        clearTimeout(bodyTimer); // 停止動動操的切換計時
+    }
+    // --- 關鍵修正：讓進度條停在當前位置 ---
+    const fill = document.getElementById('progress-fill');
+    const computedStyle = window.getComputedStyle(fill);
+    const currentWidth = computedStyle.getPropertyValue('width'); // 取得當前跑到的寬度
+    const bodyFill = document.getElementById('body-progress-fill');
+    if(bodyFill) {
+        const currentWidth = window.getComputedStyle(bodyFill).getPropertyValue('width');
+        bodyFill.style.transition = 'none';
+        bodyFill.style.width = currentWidth;
+    }
+    fill.style.transition = 'none'; // 移除動畫
+    fill.style.width = currentWidth; // 固定寬度
+
+    document.getElementById('pause-overlay').style.display = 'flex';
+}
+
+function resumeWithCountdown() {
+    document.getElementById('pause-content').style.display = 'none';
+    const c = document.getElementById('resume-countdown');
+    c.style.display = 'block';
+    
+    let s = 3; 
+    c.innerText = s;
+
+    // 初始音效與語音
+    playSound(400, 0.1, 'square'); 
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance("3"));
+
+    let itv = setInterval(() => {
+        s--;
+        
+        if(s > 0) {
+            // 倒數數字 2 和 1 的聲音
+            c.innerText = s;
+            playSound(400, 0.1, 'square'); 
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance(s.toString()));
+        } else if (s === 0) {
+            // --- 重點修改：GO 的時刻 ---
+            c.innerText = "GO!";
+            c.style.color = "#2ed573"; // 變成綠色
+            
+            // 播放一個特別亮眼、頻率較高的開場音
+            playSound(1200, 0.4, 'sine'); 
+            window.speechSynthesis.speak(new SpeechSynthesisUtterance("開始"));
+
+            // 稍微停頓一小段時間讓長輩看到 "GO!" 字樣，再關閉遮罩
+            setTimeout(() => {
+                clearInterval(itv);
+                document.getElementById('pause-overlay').style.display = 'none';
+                document.getElementById('pause-content').style.display = 'block';
+                c.style.display = 'none'; 
+                c.style.color = "#f1c40f"; // 把顏色改回原本的黃色供下次使用
+                isPaused = false;
+
+                // 恢復原本遊戲的計時
+                if (isRhythmMode) {
+        startTimers(); 
+    } else if (typeof isBodyMode !== 'undefined' && isBodyMode) {
+        startBodyCountdown(); // 恢復總時間倒數
+        
+        // --- 修正處：只重設鬧鐘，不立刻換題 ---
+        clearTimeout(bodyTimer); 
+        bodyTimer = setTimeout(() => {
+            if(!isPaused && isBodyMode) nextBodyAction();
+        }, 4000); 
+
+        // 讓進度條重新開始跑動畫
+        const bodyFill = document.getElementById('body-progress-fill');
+        if(bodyFill) {
+            bodyFill.style.transition = 'width 4s linear';
+            bodyFill.style.width = '100%';
+        }
+           // 2. 恢復身體動作切換 // 👈 關鍵：恢復動動操的切換！
+    } else if (document.getElementById('game-screen').style.display === 'block') {
+        continueChallengeTimer(); 
+    }
+    // --------------------
+}, 500); // 這裡的 500 毫秒是讓 GO 停留在螢幕上的時間
+        }
+    }, 1000);
+}
+
+let bodyParts = [
+    {e:"🙆‍♂️", n:"摸摸頭"}, {e:"👃", n:"摸摸鼻子"}, {e:"👂", n:"摸摸耳朵"}, 
+    {e:"💪", n:"摸摸肩膀"}, {e:"👐", n:"拍拍雙手"}, {e:"😊", n:"摸摸臉頰"}, 
+    {e:"👀", n:"指指眼睛"}, {e:"👄", n:"指指嘴巴"}
+];
+let bodyTimeLeft = 60;
+let bodyGameTimer; // 用來存 60 秒倒數的計時器
+
+function startBodyGame() {
+    hideAll();
+    isBodyMode = true; // 新增這行
+    isRhythmMode = false; // 新增這行
+    isPaused = false;
+    bodyTimeLeft = 60; // 重設時間
+
+    document.getElementById('body-screen').style.display = 'block';
+    document.getElementById('body-timer-text').innerText = "01:00";
+    
+    startBodyCountdown(); // 啟動總時間倒數
+    nextBodyAction();     // 啟動動作切換
+}
+
+function startBodyCountdown() {
+    clearInterval(bodyGameTimer);
+    bodyGameTimer = setInterval(() => {
+        if (!isPaused) {
+            bodyTimeLeft--;
+            let m = Math.floor(bodyTimeLeft / 60);
+            let s = bodyTimeLeft % 60;
+            document.getElementById('body-timer-text').innerText = 
+                `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+            
+            if (bodyTimeLeft <= 0) {
+                endBodyGame();
+            }
+        }
+    }, 1000);
+}
+
+// 新增結束遊戲函數
+function endBodyGame() {
+    isBodyMode = false;
+    clearInterval(bodyGameTimer);
+    clearTimeout(bodyTimer);
+    hideAll();
+    // 使用原本現有的結果畫面
+    document.getElementById('body-result-screen').style.display = 'block'; 
+    playSound(880, 0.5);
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance("太棒了，運動完成，休息一下吧"));
+}
+
+function nextBodyAction() {
+    if(isPaused) return;
+    
+    // 隨機選一個動作
+    const action = bodyParts[Math.floor(Math.random() * bodyParts.length)];
+    
+    // 顯示畫面
+    document.getElementById('body-display-emoji').innerText = action.e;
+    document.getElementById('body-display-text').innerText = action.n;
+    
+    // 語音引導
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(action.n));
+
+    // 進度條動畫 (4秒換一次)
+    const fill = document.getElementById('body-progress-fill');
+    fill.style.transition = 'none';
+    fill.style.width = '0%';
+    fill.style.backgroundColor = '#2ed573';
+
+    setTimeout(() => {
+        fill.style.transition = 'width 4s linear';
+        fill.style.width = '100%';
+    }, 50);
+
+    // 4秒後自動換下一個
+    bodyTimer = setTimeout(() => {
+        if(!isPaused) nextBodyAction();
+    }, 4000);
+}
+
     </script>
 </body>
 </html>
+
+
