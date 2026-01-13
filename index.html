@@ -2,8 +2,36 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>樂智認知遊戲 - 旗艦整合版</title>
     <style>
+
+#main-menu-screen .category-item {
+    height: 180px; /* 增加高度讓它更像大卡片 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#main-menu-screen .category-icon {
+    font-size: 70px; /* 大圖示 */
+}
+
+/* 基礎設定：讓寬度自動適應螢幕 */
+.screen { 
+    max-width: 800px; /* 電腦版最大寬度，避免畫面太扁 */
+    margin: 0 auto; 
+    padding: 10px;
+}
+
+/* 圖片辨別與主選單的網格佈局優化 */
+.category-grid {
+    display: grid;
+    gap: 15px;
+    width: 95%;
+    margin: 0 auto;
+}
 
 .category-grid {
     display: grid;
@@ -187,6 +215,37 @@
 
         .result-card { background: white; padding: 40px; border-radius: 30px; width: 80%; max-width: 400px; margin: 50px auto; box-shadow: 0 15px 35px rgba(0,0,0,0.1); color: #333; }
         #final-score { font-size: 80px; color: #ff9f43; font-weight: bold; margin: 20px 0; }
+    
+    /* --- 📱 手機版 (寬度 600px 以下) --- */
+@media (max-width: 600px) {
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr); /* 一行兩個按鈕 */
+    }
+    .emoji-display { font-size: 100px; } /* 縮小 Emoji 避免手機溢出 */
+    .btn { width: 90%; font-size: 20px; padding: 15px; } /* 按鈕變長好點擊 */
+    .category-item { height: 140px !important; } /* 縮小卡片高度 */
+    .category-icon { font-size: 50px !important; }
+}
+
+/* --- Inner Tablet 平板版 (寬度 601px ~ 1024px) --- */
+@media (min-width: 601px) and (max-width: 1024px) {
+    .category-grid {
+        grid-template-columns: repeat(3, 1fr); /* 一行三個按鈕 */
+    }
+    .emoji-display { font-size: 130px; }
+    .category-item { height: 160px !important; }
+}
+
+/* --- 💻 電腦版 (寬度 1025px 以上) --- */
+@media (min-width: 1025px) {
+    .category-grid {
+        grid-template-columns: repeat(3, 1fr); /* 一行三個，或四個 */
+    }
+    .screen {
+        padding-top: 40px; /* 增加上方空間 */
+    }
+}
+    
     </style>
 </head>
 <body>
@@ -200,16 +259,43 @@
         <div id="resume-countdown" style="display:none;">3</div>
     </div>
 
-    <div id="menu-screen" class="screen">
-    <h1>🎮 樂智認知遊戲選單</h1>
-    <button onclick="showCategoryMenu()" class="btn" style="background: #4a90e2; color: white; width: 80%; max-width: 400px;">
-        🖼️ 圖片辨別挑戰
-    </button>
-    <br>
-    <button onclick="startRhythm()" class="btn" style="background: #ffbe76;">🥁 節奏拍手</button>
+    <div id="main-menu-screen" class="screen" style="display: block;">
+    <h1>🌟 樂智綜合訓練中心</h1>
+    <div class="category-grid">
+        <div class="category-item" onclick="showSubMenu('brain')" style="background: #e1f5fe;">
+            <div class="category-icon">🧠</div>
+            <div class="category-label">腦力激盪</div>
+        </div>
+        <div class="category-item" onclick="showSubMenu('body-logic')" style="background: #fff3e0;">
+            <div class="category-icon">⚡</div>
+            <div class="category-label">體智活動</div>
+        </div>
+        <div class="category-item" style="background: #f1f8e9; opacity: 0.6;">
+            <div class="category-icon">🏃</div>
+            <div class="category-label">體適能(開發中)</div>
+        </div>
+        <div class="category-item" style="background: #fce4ec; opacity: 0.6;">
+            <div class="category-icon">🎤</div>
+            <div class="category-label">唱歌(開發中)</div>
+        </div>
+    </div>
+</div>
+
+<div id="brain-menu-screen" class="screen">
+    <h2>🧠 腦力激盪</h2>
+    <button onclick="showCategoryMenu()" class="btn" style="background: #4a90e2; color: white;">🖼️ 圖片辨別挑戰</button>
     <button onclick="startMemoryGame()" class="btn" style="background: #a29bfe; color: white;">🎴 翻牌配對</button>
     <button onclick="startCountGame()" class="btn" style="background: #55efc4;">🔢 數量挑戰</button>
+    <br>
+    <button onclick="showMainMenu()" class="btn back-btn">⬅️ 回上一頁</button>
+</div>
+
+<div id="body-logic-menu-screen" class="screen">
+    <h2>⚡ 體智活動</h2>
+    <button onclick="startRhythm()" class="btn" style="background: #ffbe76;">🥁 節奏拍手</button>
     <button onclick="startBodyGame()" class="btn" style="background: #ffa502;">🧘 健康動動操</button>
+    <br>
+    <button onclick="showMainMenu()" class="btn back-btn">⬅️ 回上一頁</button>
 </div>
 
 <div id="category-screen" class="screen">
@@ -240,7 +326,7 @@
             <div class="category-label">建築</div>
         </div>
     </div>
-    <button onclick="location.reload()" class="btn back-btn">⬅️ 回主選單</button>
+    <button onclick="location.reload()" class="btn back-btn">🏠 返回主選單</button>
 </div>
     <div id="game-screen" class="screen">
         <div class="info-bar">
@@ -300,17 +386,17 @@
             <button onclick="initMemoryGame(6)" class="btn" style="background: #55efc4;">🟢 簡單 (6張)</button><br>
             <button onclick="initMemoryGame(8)" class="btn" style="background: #74b9ff;">🔵 一般 (8張)</button><br>
             <button onclick="initMemoryGame(10)" class="btn" style="background: #ff7675; color:white;">🔴 困難 (10張)</button><br>
-            <button onclick="location.reload()" class="btn back-btn">⬅️ 返回</button>
+           
         </div>
         <div id="memory-game-area" style="display:none;">
 
         
             
                 <span id="memory-status">請翻開兩張牌</span>
-                <button class="pause-btn" onclick="startMemoryGame()">🔄 重選</button>
+                <button class="pause-btn" onclick="startMemoryGame()">🔄 重選難度</button>
             </div>
             <div id="memory-grid" style="display: grid; grid-gap: 12px; width: 95%; max-width: 600px; margin: 20px auto;"></div>
-            <button onclick="location.reload()" class="btn back-btn">🏠 主選單</button>
+            <button onclick="location.reload()" class="btn back-btn">🏠 返回主選單</button>
         </div>
         
     </div>
@@ -360,31 +446,54 @@
 
     <script>
 
+    // 顯示最外層選單
+function showMainMenu() {
+    hideAll();
+    document.getElementById('main-menu-screen').style.display = 'block';
+}
+
+// 顯示大類別選單 (腦力激盪 或 體智活動)
+function showSubMenu(type) {
+    hideAll();
+    if(type === 'brain') {
+        document.getElementById('brain-menu-screen').style.display = 'block';
+    } else if(type === 'body-logic') {
+        document.getElementById('body-logic-menu-screen').style.display = 'block';
+    }
+}
+
 function handleBackFromPause() {
-    // 1. 強制清除所有計時器，確保畫面停止
+    // 1. 強制清除所有計時器與語音，確保完全停止
     clearTimeout(answerTimeout);
     clearInterval(visualCountdownInterval);
     clearInterval(rhythmTimer);
     clearInterval(countdownTimer);
     if(typeof bodyGameTimer !== 'undefined') clearInterval(bodyGameTimer);
     if(typeof bodyTimer !== 'undefined') clearTimeout(bodyTimer);
+    window.speechSynthesis.cancel();
 
     // 2. 關閉暫停遮罩
     document.getElementById('pause-overlay').style.display = 'none';
 
-    // 3. 核心邏輯：判斷回到哪一頁
-    // 如果 currentType 不是空的，代表正在玩 水果、動物、樂器等圖片辨別挑戰
+    // 3. 核心路徑判斷
+    hideAll(); 
+
     if (currentType !== '') {
-        hideAll();
+        // 如果是在玩圖片辨別系列 -> 回到「圖片分類選單」
         document.getElementById('category-screen').style.display = 'block';
-        // 重要：返回選單後清空目前類型，避免下次誤判
-        currentType = ''; 
+        currentType = ''; // 清空狀態
+    } else if (isRhythmMode || isBodyMode) {
+        // 關鍵修正：如果是節奏或動動操 -> 回到「體智活動選單」
+        document.getElementById('body-logic-menu-screen').style.display = 'block';
+        isRhythmMode = false;
+        isBodyMode = false;
     } else {
-        // 如果是動動操、節奏拍手等，則回到最外層主選單
-        hideAll();
-        document.getElementById('menu-screen').style.display = 'block';
+        // 翻牌、數量挑戰或其他 -> 回到「腦力激盪選單」
+        document.getElementById('brain-menu-screen').style.display = 'block';
     }
 }
+
+    
 
     function showCategoryMenu() {
     hideAll();
@@ -932,5 +1041,4 @@ function nextBodyAction() {
     </script>
 </body>
 </html>
-
 
